@@ -1,3 +1,5 @@
+/*
+启动前的模板框架
 package main
 
 import (
@@ -29,3 +31,36 @@ func helloHandler(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Header[%q]=%q\n", k, v)
 	}
 }
+*/
+
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+)
+
+// 定义空的结构体，将原本的nil替换，实现ServeHTTP
+type Engine struct{}
+
+func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	switch req.URL.Path {
+	case "/":
+		fmt.Fprintf(w, "URL.Path= %q \n ", req.URL.Path)
+	case "/hello":
+		for k, v := range req.Header {
+			fmt.Fprintf(w, "Header[%q]=%q\n", k, v)
+		}
+	default:
+		fmt.Fprintf(w, "404 NOT FOUND: %s\n", req.URL)
+	}
+}
+
+func main() {
+	engine := new(Engine)
+	log.Fatal(http.ListenAndServe(":9999", engine))
+}
+
+//参数定义：http.ListenAndServe(address,handler)
+//http.ListenAndServe(":9999", nil)这种操作是因为调用了DefaultServeMux
